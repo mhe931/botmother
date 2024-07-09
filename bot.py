@@ -1,7 +1,6 @@
-# bot.py
 import config
 import database as db
-import handlers
+from handlers import main
 
 def initialize():
     db.create_tables()
@@ -9,8 +8,8 @@ def initialize():
 
 if __name__ == '__main__':
     initialize()
-    handlers.main()
-
+    main()
+ 
 
     """
     ## Running the Bot

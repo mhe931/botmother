@@ -1,18 +1,12 @@
 # Telegram User Management Bot
 
-This is a Telegram bot built using the [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot) library. The bot manages users, allowing an admin to approve user profiles and assign access permissions. User data is stored in an SQLite database with password protection.
+This is a Telegram bot built using the [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot) library. The bot manages users, allowing an admin to approve user profiles and assign access permissions. User data is stored in an SQLite database.
 
 ## Features
 
 - **User Registration:** Users can register by answering a series of questions.
 - **Admin Approval:** User profiles are sent to an admin for approval.
 - **Access Management:** Admins can assign, edit, or delete access permissions for users.
-- **Command Forwarding:** All user commands are forwarded to a specified Telegram channel.
-- **Admin Commands:**
-  - `/userlist`: View a list of users.
-  - `/adminlist`: View a list of admins.
-  - `/accesslist`: View and manage access permissions.
-  - `/nameparamlist`: View and manage profile questions.
 
 ## Requirements
 
@@ -68,7 +62,6 @@ telegram-user-management-bot/
 ├── requirements.txt # Python dependencies
 └── README.md # Project documentation
 
-
 ## Database Structure
 
 - **users**: Stores user profiles.
@@ -91,30 +84,7 @@ telegram-user-management-bot/
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/mhe931/botmother/blob/main/LICENSE) file for more details.
-
-
-### User Access Journey
-## User Starts Interaction:
-
-1. The user sends the /start command to the bot.
-* The bot checks if the user is already registered.
-* User Registration:
-
-2. If the user is not registered, the bot asks a series of questions (retrieved from the database).
-* The user answers these questions one by one.
-* Once all questions are answered, the user's profile is created and stored in the database.
-* The bot notifies the admin about the new user registration.
-
-3. Admin Reviews User Profile:
-
-* The admin receives a message from the bot with the new user's profile details.
-* The admin decides whether to grant access to the user.
-
-4. User Access:
-
-* The user can send the /help command to see the list of available commands they can use.
-* The commands available to the user are determined by the access permissions granted by the admin.
+This project is licensed under the MIT License. See the LICENSE file for more details.
 
 ## Admin Access Journey
 1. Admin Starts Interaction:
