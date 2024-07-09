@@ -54,6 +54,22 @@ def get_user(telegram_id):
     conn.close()
     return user
 
+def get_users():
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM users')
+    users = cursor.fetchall()
+    conn.close()
+    return users
+
+def get_admins():
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM users WHERE is_admin = 1')
+    admins = cursor.fetchall()
+    conn.close()
+    return admins
+
 def add_question(question):
     conn = connect_db()
     cursor = conn.cursor()
@@ -62,6 +78,14 @@ def add_question(question):
     conn.close()
 
 def get_questions():
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM questions')
+    questions = cursor.fetchall()
+    conn.close()
+    return questions
+
+def get_questions_list():
     conn = connect_db()
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM questions')
@@ -84,10 +108,25 @@ def get_accesses():
     conn.close()
     return accesses
 
+def get_access_list():
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM accesses')
+    accesses = cursor.fetchall()
+    conn.close()
+    return accesses
+
 def add_user_access(user_id, access_id):
     conn = connect_db()
     cursor = conn.cursor()
     cursor.execute('INSERT INTO user_access (user_id, access_id) VALUES (?, ?)', (user_id, access_id))
+    conn.commit()
+    conn.close()
+
+def remove_user_access(user_id, access_id):
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM user_access WHERE user_id = ? AND access_id = ?', (user_id, access_id))
     conn.commit()
     conn.close()
 
@@ -98,3 +137,10 @@ def get_user_accesses(user_id):
     accesses = cursor.fetchall()
     conn.close()
     return accesses
+
+def set_admin(user_id):
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute('UPDATE users SET is_admin = 1 WHERE telegram_id = ?', (user_id,))
+    conn.commit()
+    conn.close()
