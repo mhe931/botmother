@@ -1,11 +1,15 @@
 # bot.py
+import config
 import database as db
 import handlers
 
-if __name__ == '__main__':
+def initialize():
     db.create_tables()
-    handlers.main()
+    db.initialize_commands(config.AVAILABLE_COMMANDS)
 
+if __name__ == '__main__':
+    initialize()
+    handlers.main()
 
 
     """

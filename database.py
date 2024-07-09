@@ -38,6 +38,14 @@ def create_tables():
     conn.commit()
     conn.close()
 
+def initialize_commands(commands):
+    conn = connect_db()
+    cursor = conn.cursor()
+    for command in commands:
+        cursor.execute('INSERT OR IGNORE INTO accesses (access_name, description) VALUES (?, ?)', command)
+    conn.commit()
+    conn.close()
+
 def add_user(telegram_id, username, profile):
     conn = connect_db()
     cursor = conn.cursor()
@@ -142,5 +150,13 @@ def set_admin(user_id):
     conn = connect_db()
     cursor = conn.cursor()
     cursor.execute('UPDATE users SET is_admin = 1 WHERE telegram_id = ?', (user_id,))
+    conn.commit()
+    conn.close()
+
+
+def add_command(command_name, description):
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO accesses (access_name, description) VALUES (?, ?)', (command_name, description))
     conn.commit()
     conn.close()

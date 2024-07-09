@@ -1,11 +1,12 @@
 # handlers.py
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ConversationHandler, CallbackContext, CallbackQueryHandler
 import config
 import database as db
 
 # States for the conversation
-ACCESS_NAME, ACCESS_DESCRIPTION = range(2)
+ACCESS_NAME, ACCESS_DESCRIPTION, COMMAND_NAME, COMMAND_DESCRIPTION = range(4)
 
 # Function to show help commands
 async def help_command(update: Update, context: CallbackContext):
@@ -93,7 +94,10 @@ async def handle_message(update: Update, context: CallbackContext):
             db.add_user(user_id, update.message.from_user.username, profile)
             context.user_data.clear()
             await update.message.reply_text("Thank you for registering. Your profile will be reviewed by an admin.")
-            await context.bot.send_message(config.ADMIN_ID, f"New user registered: @{username}\nProfile: {profile}")
+            all_commands = db.get_all_commands()
+            buttons = [[InlineKeyboardButton(command[0], callback_data=f"grant_{user_id}_{command[0]}")] for command in all_commands]
+            reply_markup = InlineKeyboardMarkup(buttons)
+            await context.bot.send_message(config.ADMIN_ID, f"New user registered: @{update.message.from_user.username}\nProfile: {profile}", reply_markup=reply_markup)
 
 async def userlist(update: Update, context: CallbackContext):
     if update.message.from_user.id == config.ADMIN_ID:
@@ -146,6 +150,26 @@ async def cancel(update: Update, context: CallbackContext):
     await update.message.reply_text("Operation cancelled.")
     return ConversationHandler.END
 
+async def addcommand_start(update: Update, context: CallbackContext):
+    if update.message.from_user.id == config.ADMIN_ID:
+        await update.message.reply_text("Please enter the command name:")
+        return COMMAND_NAME
+    else:
+        await update.message.reply_text("You are not authorized to add commands.")
+        return ConversationHandler.END
+
+async def addcommand_name(update: Update, context: CallbackContext):
+    context.user_data['command_name'] = update.message.text
+    await update.message.reply_text("Please enter the command description:")
+    return COMMAND_DESCRIPTION
+
+async def addcommand_description(update: Update, context: CallbackContext):
+    command_name = context.user_data['command_name']
+    command_description = update.message.text
+    db.add_command(command_name, command_description)
+    await update.message.reply_text(f"Command '/{command_name}' with description '{command_description}' has been added.")
+    return ConversationHandler.END
+
 def main():
     app = Application.builder().token(config.BOT_TOKEN).build()
     
@@ -169,7 +193,18 @@ def main():
         fallbacks=[CommandHandler('cancel', cancel)]
     )
 
+    # Conversation handler for adding commands
+    addcommand_conv_handler = ConversationHandler(
+        entry_points=[CommandHandler('addcommand', addcommand_start)],
+        states={
+            COMMAND_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, addcommand_name)],
+            COMMAND_DESCRIPTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, addcommand_description)],
+        },
+        fallbacks=[CommandHandler('cancel', cancel)]
+    )
+
     app.add_handler(addaccess_conv_handler)
+    app.add_handler(addcommand_conv_handler)
     app.add_handler(CallbackQueryHandler(button, pattern='edit_access_'))
     app.add_handler(CallbackQueryHandler(grant_access, pattern='grant_'))
     app.add_handler(CallbackQueryHandler(revoke_access, pattern='revoke_'))
